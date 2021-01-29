@@ -26,7 +26,7 @@ col_convert = TRUE
 
 # Create stats folder
 stats_out_dir <- file.path(out_dir, "stats")
-dir.create(stats_out_dir, showWarnings = FALSE)
+dir.create(stats_out_dir, recursive = TRUE, showWarnings = FALSE)
 
 # Read file 
 raw_data <- read.delim(input_data, header = TRUE, stringsAsFactors = FALSE)
