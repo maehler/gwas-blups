@@ -1,6 +1,8 @@
-suppressPackageStartupMessages(library(dplyr))
-suppressPackageStartupMessages(library(utils))
-source("/mnt/picea/projects/aspseq/nstreet/swasp/Sara/GWAS_buds/scripts/R/Pre_GWAS/BLUP_pipeline/generate_BLUP.R")
+suppressPackageStartupMessages({
+  library(dplyr)
+  library(here)
+})
+source(here("R/generate_BLUP.R"))
 
 #######################################################################
 # Set arguments 
