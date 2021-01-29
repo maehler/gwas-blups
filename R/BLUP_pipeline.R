@@ -14,10 +14,10 @@ data_name <- "SPGs" # File name prefix
 line_name <- "Genotype" # Has to match line column name in input_data. E.g., "Genotype", "Clone". Required for boxplots. 
 
 # BLUP arguments - specify column number. See generate_BLUP.R function for more info.    
-random_effect = c(4)
-sample_column = c(1)
-fixed_effect = c(7)
-start_column = c(16)
+random_effect = 4
+sample_column = 1
+fixed_effect = 7
+start_column = 16
 col_convert = TRUE
 
 #######################################################################
