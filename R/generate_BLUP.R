@@ -13,28 +13,34 @@
 #' @keywords BLUP, Pre-GWAS
 #' @export
 #'
-generate_BLUP <- function(dat = NULL, random_effect = NULL, sample_column = NULL, start_column = NULL, fixed_effect = NULL, col_convert = TRUE) {
+generate_BLUP <- function(dat, random_effect, sample_column, start_column, fixed_effect = NULL, col_convert = TRUE) {
   
   # Check if input arguments are given
-  if(is.null(dat)){
-    stop(paste("Data needs to be provided"))
+  if (missing(dat)) {
+    stop("Data needs to be provided")
   }
   
-  if(!all(is.numeric(random_effect))){
-    stop(paste("Random effect column(s) needs to be provided"))
+  if (missing(random_effect)) {
+    stop("Random effect column(s) needs to be provided")
+  } else if (!is.numeric(random_effect) && any(random_effect < 1)) {
+    stop("Random effect needs to be > 0")
   }
   
-  if(!is.numeric(sample_column) | sample_column == "0"){
-    stop(paste("Sample column needs to be provided"))
+  if (missing(sample_column)) {
+    stop("Sample column needs to be provided")
+  } else if (!is.numeric(sample_column) && sample_column < 1) {
+    stop("Sample column needs to be > 0")
   }
   
-  if(!is.numeric(start_column) | start_column == "0"){
-    stop(paste("Start column needs to be provided"))
+  if (missing(start_column)) {
+    stop("Start column needs to be provided")
+  } else if (!is.numeric(start_column) && start_column < 1) {
+    stop("Start column needs to be > 0")
   }
   
-  if(!is.null(fixed_effect)){
-    if(all(!is.numeric(fixed_effect))){
-    stop(paste("Fixed effect column number(s) must be numeric"))
+  if (!is.null(fixed_effect)) {
+    if(!is.numeric(fixed_effect) && any(fixed_effect) < 1) {
+      stop("Fixed effect column number(s) must be integers > 0")
     }
   }
   
