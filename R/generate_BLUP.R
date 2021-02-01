@@ -78,13 +78,16 @@ generate_BLUP <- function(dat, random_effect, sample_column, start_column, fixed
   
   # Find outliers
   trait_names <- colnames(dat)[start_column:ncol(dat)]
-  outliers_residuals <- lapply(trait_names, function(t){
-    res <- car::outlierTest(lme4::lmer(formula = reformulate(termlabels = termlabels, response = t), data = dat, REML = TRUE), n.max
-                            = nrow(dat), cutoff = 0.05)
-    rm_row <- res$bonf.p %>% rmutil::as.data.frame() %>% dplyr::filter(. < 0.05) %>% row.names()
-    return(rm_row)
+  
+  outliers_residuals <- purrr::map(setNames(trait_names, trait_names), function(t) {
+    res <- car::outlierTest(
+      lme4::lmer(formula = reformulate(termlabels = termlabels, response = t),
+                 data = dat, REML = TRUE),
+      n.max = nrow(dat),
+      cutoff = 0.05
+    )
+    names(res$bonf.p)[res$bonf.p < 0.05]
   })
-  names(outliers_residuals) <- trait_names
   
   if(!identical(outliers_residuals, character(0))){
     temp_outliers_residuals <- outliers_residuals
