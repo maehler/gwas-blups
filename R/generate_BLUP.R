@@ -86,35 +86,14 @@ generate_BLUP <- function(dat, random_effect, sample_column, start_column, fixed
       n.max = nrow(dat),
       cutoff = 0.05
     )
-    names(res$bonf.p)[res$bonf.p < 0.05]
+    as.integer(names(res$bonf.p)[res$bonf.p < 0.05])
   })
   
-  if(!identical(outliers_residuals, character(0))){
-    temp_outliers_residuals <- outliers_residuals
-    
-    outlier_dat <- data.frame()
-    
-    # Remove outliers 
-    for (i in 1:length(temp_outliers_residuals)) {
-      rows <- match(temp_outliers_residuals[[i]], row.names(dat[names(temp_outliers_residuals)[i]]))
-      columns <- which(grepl(names(temp_outliers_residuals)[i], colnames(dat)))
-      temp_outliers_residuals[[i]] <- dat[rows, c(sample_column, columns)]
-
-      dat[rows, columns] <- NA
-      
-      if(nrow(temp_outliers_residuals[[i]]) > 0){
-        if(nrow(outlier_dat) == 0){
-          outlier_dat <- temp_outliers_residuals[[i]]
-        }else{
-          outlier_dat <- merge(outlier_dat, temp_outliers_residuals[[i]],
-                               by = intersect(colnames(outlier_dat), colnames(temp_outliers_residuals[[i]])),
-                               all = TRUE)
-        }
-      }
+  purrr::walk2(names(outliers_residuals), outliers_residuals, ~ {
+    if (length(.y) > 0) {
+      dat <<- dplyr::mutate(dat, across(all_of(.x), function(column) replace(column, .y, NA)))
     }
-    # Re-arrange row names
-    row.names(dat) <- seq(from = 1, to = nrow(dat), by = 1)
-  }
+  })
 
   outlier_removed_dat = dat
   
