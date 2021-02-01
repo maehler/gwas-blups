@@ -46,14 +46,14 @@ generate_BLUP <- function(dat, random_effect, sample_column, start_column, fixed
   
   if (col_convert) {
     cat("\tConverting lmer model effect columns to factor type\n")
-    dat <- dplyr::mutate_at(dat, random_effect, as.factor)
+    dat <- dplyr::mutate(dat, across(all_of(random_effect), as.factor))
     if (!is.null(fixed_effect)) {
-      dat <- dplyr::mutate_at(dat, fixed_effect, as.factor)
+      dat <- dplyr::mutate(dat, across(all_of(fixed_effect), as.factor))
     }
   }
   
   # Convert the response columns to numeric
-  dat <- dplyr::mutate_at(dat, seq(start_column, ncol(dat)), as.numeric)
+  dat <- dplyr::mutate(dat, across(seq(start_column, ncol(dat)), as.numeric))
   
   # Extract fixed effect name(s) (if provided)
   if (!is.null(fixed_effect)) {
