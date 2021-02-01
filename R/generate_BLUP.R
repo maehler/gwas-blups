@@ -120,7 +120,7 @@ generate_BLUP <- function(dat, random_effect, sample_column, start_column, fixed
   
   # Transform those traits
   ## transform 
-  dplyr::mutate(dat, dplyr::across(all_of(trans_trait), ~ {
+  dat <- dplyr::mutate(dat, dplyr::across(all_of(trans_trait), ~ {
     output <- purrr::quietly(bestNormalize::orderNorm)(.)
     if (length(output$warnings) > 0) {
       warning(paste0(dplyr::cur_column(), ": ", output$warnings))
