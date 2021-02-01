@@ -139,56 +139,31 @@ generate_BLUP <- function(dat, random_effect, sample_column, start_column, fixed
   print("Calculate BLUPs")
   cat(paste("\tlmer model, effect included in formula:",termlabels,"\n"))
   
+  # Check all columns for NaN and Inf
+  dat <- dplyr::mutate(dat, across(seq(start_column, ncol(dat)),
+                                   ~ ifelse(is.infinite(.) | is.nan(.), NA, .)))
+  
   # fit the model
-  BLUP_out <- list()
-  for(i in start_column:ncol(dat)){
-    
-    dat[is.infinite(dat[,i]),i] = NA
-    dat[is.nan(dat[,i]),i] = NA
-    
-    lme <- lme4::lmer(formula = reformulate(termlabels = termlabels, response = colnames(dat)[i]), data = dat, REML = TRUE)
-
+  blup <- purrr::map2_dfc(seq_along(trait_names), setNames(trait_names, trait_names), ~ {
+    lme <- lme4::lmer(formula = reformulate(termlabels = termlabels, response = .y), data = dat, REML = TRUE)
     # estimate BLUP
     modelblup <- lme4::ranef(lme)
-    cat(paste("\tBLUP selected:",names(modelblup[1]),"\n"))
+    message(paste0("\tBLUP selected (", .y, "): ", names(modelblup[1])))
     
     # extract BLUP and add grand mean when only one repetition present
-    BLUP_out[[colnames(dat)[i]]] <- modelblup[[1]] + summary(lme)$coefficients[1]
-  }
-
-  if(length(BLUP_out) > 0){
-    for (i in 1:length(BLUP_out)) {
-      temp <- as.data.frame(BLUP_out[[i]])
-      temp$New <- row.names(temp)
-      temp$id <- names(BLUP_out)[i]
-      temp <- temp[,c(3, 2, 1)]
-      colnames(temp) <- c("id", "Line", "Intercept")
-      row.names(temp) <- seq(from = 1, to = nrow(temp), by = 1)
-      BLUP_out[[i]] <- temp
-      
-      if(i==1){
-        BLUP_out_df <- BLUP_out[[i]]
-      } else{
-        BLUP_out_df <- rbind(BLUP_out_df, BLUP_out[[i]])
-      }
+    if (.x == 1) {
+      # Only add a genotype column for the first trait in order to not have
+      # more than one of them in the final tibble.
+      dplyr::tibble(Genotype = rownames(modelblup[[1]]),
+                    !!(.y) := modelblup[[1]][[1]] + summary(lme)$coefficients[1])
+    } else {
+      dplyr::tibble(!!(.y) := modelblup[[1]][[1]] + summary(lme)$coefficients[1])
     }
-    blup <- reshape2::dcast(BLUP_out_df, Line ~ id, value.var = "Intercept")
-    colnames(blup)[1] <- colnames(dat)[random_effect[1]]
-    row.names(blup) <- seq(from = 1, to = nrow(blup), by = 1)
-  }
+  })
   
-  not_converge_columns = c()
-  for(i in 1:ncol(blup)){
-    if(is.numeric(blup[,i])){
-      if(var(blup[,i], na.rm = TRUE) < 1e-6){
-        not_converge_columns = c(not_converge_columns, colnames(blup)[i])
-      }
-    }
-  }
-  
-  if(!is.null(not_converge_columns)){
-    blup = blup[, -(match(not_converge_columns, colnames(blup)))]
-  }
+  blup_var <- purrr::map_dbl(dplyr::select(blup, -Genotype), var, na.rm = TRUE)
+  not_converge_columns <- names(blup_var)[blup_var < 1e-6]
+  blup <- dplyr::select(blup, -all_of(not_converge_columns))
   
   # Shapiro test BLUP
   blup_stats <- lapply(names(blup)[-1], function(i) {
