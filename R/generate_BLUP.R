@@ -107,21 +107,16 @@ generate_BLUP <- function(dat, random_effect, sample_column, start_column, fixed
   #######################################################################
   print("Calculate orderNorm transformed")
   
-  # Extract trait names 
-  trait_names <- colnames(dat)[c(start_column:ncol(dat))]
-    
-  # Store shapiro test 
-  shap_norm <- lapply(trait_names, function(t) {
-    shap_res <- shapiro.test(dat[[t]]) 
-    shap_p <- shap_res$p.value
-    data.frame(Trait = t,
-               Shapiro_pval = shap_p,
-               Shapiro_OK = ifelse(shap_p > 0.05, "TRUE", "FALSE"),
-               stringsAsFactors = FALSE)
-  }) %>% bind_rows %>% as.data.frame()
+  # Store shapiro test
+  shap_norm <- purrr::map_df(trait_names, function(t) {
+    shap_res <- shapiro.test(dplyr::pull(dat, t))
+    tibble(Trait = t,
+           Shapiro_pval = shap_res$p.value,
+           Shapiro_OK = Shapiro_pval > 0.05)
+  })
   
   # Extract names of trait in need of transfromation
-  trans_trait <- shap_norm %>% subset(Shapiro_OK == FALSE) %>% dplyr::select(c(Trait)) %>% dplyr::pull()
+  trans_trait <- shap_norm$Trait[!shap_norm$Shapiro_OK]
   
   # Transform those traits
   ## transform 
