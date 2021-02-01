@@ -120,19 +120,13 @@ generate_BLUP <- function(dat, random_effect, sample_column, start_column, fixed
   
   # Transform those traits
   ## transform 
-  for(t in trans_trait){
-    orderNorm_obj <- bestNormalize::orderNorm(dat[[t]])
-    dat[[t]] <- orderNorm_obj$x.t
-  }
-  
-  ## catch warning messages 
-   for(t in trans_trait){
-     tryCatch({
-       orderNorm_obj <- bestNormalize::orderNorm(dat[[t]])
-     }, warning = function(w){
-       cat(paste(t, ":", w))
-     })
-   }
+  dplyr::mutate(dat, dplyr::across(all_of(trans_trait), ~ {
+    output <- purrr::quietly(bestNormalize::orderNorm)(.)
+    if (length(output$warnings) > 0) {
+      warning(paste0(dplyr::cur_column(), ": ", output$warnings))
+    }
+    output$result$x.t
+  }))
   
   # Sanity check 
   if(!identical(start_colnames, colnames(dat))){
