@@ -69,20 +69,9 @@ generate_BLUP <- function(dat, random_effect, sample_column, start_column, fixed
   print("Remove outliers")
   
   # Create lmer formula
+  termlabels <- c(paste0("(1|", colnames(dat)[random_effect], ")"))
   if (length(random_effect) > 0 & !is.null(fixed_effect)) { # with fixed effect
-    termlabels <- fixed_ef
-    for (i in 1:length(random_effect)) {
-      my_col <- random_effect[i]
-      temp <- paste("(1|", colnames(dat)[my_col], ")", sep = "")
-      termlabels <- c(termlabels, temp)
-    }
-  } else if (length(random_effect) > 0 & is.null(fixed_effect)){ # no fixed effect
-    termlabels <- c()
-    for (i in 1:length(random_effect)) {
-      my_col <- random_effect[i]
-      temp <- paste("(1|", colnames(dat)[my_col], ")", sep = "")
-      termlabels <- c(termlabels, temp)
-    }
+    termlabels <- c(fixed_ef, termlabels)
   }
   
   cat(paste("\tlmer model, effect included in formula:",termlabels,"\n"))
