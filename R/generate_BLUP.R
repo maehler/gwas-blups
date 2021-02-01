@@ -39,7 +39,7 @@ generate_BLUP <- function(dat, random_effect, sample_column, start_column, fixed
   }
   
   if (!is.null(fixed_effect)) {
-    if(!is.numeric(fixed_effect) & any(fixed_effect) < 1 | length(fixed_effect) == 0) {
+    if(!is.numeric(fixed_effect) & any(fixed_effect < 1) | length(fixed_effect) == 0) {
       stop("Fixed effect column number(s) must be integers > 0")
     }
   }
@@ -53,7 +53,7 @@ generate_BLUP <- function(dat, random_effect, sample_column, start_column, fixed
   }
   
   # Convert the response columns to numeric
-  dat <- dplyr::mutate_at(dat, seq(start_column, ncol(dat), as.numeric))
+  dat <- dplyr::mutate_at(dat, seq(start_column, ncol(dat)), as.numeric)
   
   # Extract fixed effect name(s) (if provided)
   if (!is.null(fixed_effect)) {
