@@ -22,24 +22,24 @@ generate_BLUP <- function(dat, random_effect, sample_column, start_column, fixed
   
   if (missing(random_effect)) {
     stop("Random effect column(s) needs to be provided")
-  } else if (!is.numeric(random_effect) && any(random_effect < 1)) {
+  } else if (!is.numeric(random_effect) & any(random_effect < 1) | length(random_effect) == 0) {
     stop("Random effect needs to be > 0")
   }
   
   if (missing(sample_column)) {
     stop("Sample column needs to be provided")
-  } else if (!is.numeric(sample_column) && sample_column < 1) {
+  } else if (!is.numeric(sample_column) & sample_column < 1) {
     stop("Sample column needs to be > 0")
   }
   
   if (missing(start_column)) {
     stop("Start column needs to be provided")
-  } else if (!is.numeric(start_column) && start_column < 1) {
+  } else if (!is.numeric(start_column) & start_column < 1) {
     stop("Start column needs to be > 0")
   }
   
   if (!is.null(fixed_effect)) {
-    if(!is.numeric(fixed_effect) && any(fixed_effect) < 1) {
+    if(!is.numeric(fixed_effect) & any(fixed_effect) < 1 | length(fixed_effect) == 0) {
       stop("Fixed effect column number(s) must be integers > 0")
     }
   }
@@ -56,8 +56,8 @@ generate_BLUP <- function(dat, random_effect, sample_column, start_column, fixed
   dat <- dplyr::mutate_at(dat, seq(start_column, ncol(dat), as.numeric))
   
   # Extract fixed effect name(s) (if provided)
-  if (length(fixed_effect) > 0) {
-  fixed_ef <- colnames(dat)[fixed_effect]
+  if (!is.null(fixed_effect)) {
+    fixed_ef <- colnames(dat)[fixed_effect]
   }
   
   # Use this sanity check to see if column names are consistent throughout the analysis.
@@ -69,8 +69,8 @@ generate_BLUP <- function(dat, random_effect, sample_column, start_column, fixed
   print("Remove outliers")
   
   # Create lmer formula
-  if (length(random_effect) > 0 & length(fixed_effect) > 0) { # with fixed effect
-    termlabels <- c(fixed_ef)
+  if (length(random_effect) > 0 & !is.null(fixed_effect)) { # with fixed effect
+    termlabels <- fixed_ef
     for (i in 1:length(random_effect)) {
       my_col <- random_effect[i]
       temp <- paste("(1|", colnames(dat)[my_col], ")", sep = "")
