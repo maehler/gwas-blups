@@ -166,29 +166,18 @@ generate_BLUP <- function(dat, random_effect, sample_column, start_column, fixed
   blup <- dplyr::select(blup, -all_of(not_converge_columns))
   
   # Shapiro test BLUP
-  blup_stats <- lapply(names(blup)[-1], function(i) {
-    shap_BLUPs <- shapiro.test(blup[[i]]) 
-    shap_BLUPs_P <- shap_BLUPs$p.value
-    data.frame(Trait = i,
-               Shapiro_BLUPs_pval = shap_BLUPs_P, 
-               Shapiro_BLUPs_OK = ifelse(shap_BLUPs_P > 0.05, "TRUE", "FALSE"),
-               stringsAsFactors = FALSE)
-  }) %>% bind_rows %>% as.data.frame()
-  
-  # Store data   
-  if(exists("blup")){
-    return(
-      list(
-        "Outlier_removed_data" = outlier_removed_dat,
-        "Outlier_data" = outlier_dat,
-        "Outliers_residuals" = outliers_residuals,
-        "Shapiro_raw_normtest" = shap_norm,
-        "BLUP" = blup,
-        "BLUP_shapiro" = blup_stats,
-        "Not_converge_columns" = not_converge_columns
-      )
-    )
-  } else{
-    return(-1)
-  }
+  purrr::map_df(dplyr::select(blup, -Genotype), ~ {
+    tibble(Shapiro_BLUPs_pval = shapiro.test(.)$p.value,
+           Shapiro_BLUPs_OK = Shapiro_BLUPs_pval > 0.05)
+  }, .id = "Trait")
+
+  list(
+    "Outlier_removed_data" = outlier_removed_dat,
+    "Outlier_data" = outlier_dat,
+    "Outliers_residuals" = outliers_residuals,
+    "Shapiro_raw_normtest" = shap_norm,
+    "BLUP" = blup,
+    "BLUP_shapiro" = blup_stats,
+    "Not_converge_columns" = not_converge_columns
+  )
 }
