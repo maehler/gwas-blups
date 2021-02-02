@@ -89,13 +89,19 @@ generate_BLUP <- function(dat, random_effect, sample_column, start_column, fixed
     as.integer(names(res$bonf.p)[res$bonf.p < 0.05])
   })
   
+  outlier_dat <- purrr::map2_dfr(names(outliers_residuals), outliers_residuals, ~ {
+    if (length(.y) > 0) {
+      dplyr::select(dat, all_of(sample_column), all_of(.x)) %>% dplyr::slice(.y)
+    }
+  })
+  
   purrr::walk2(names(outliers_residuals), outliers_residuals, ~ {
     if (length(.y) > 0) {
       dat <<- dplyr::mutate(dat, across(all_of(.x), function(column) replace(column, .y, NA)))
     }
   })
 
-  outlier_removed_dat = dat
+  outlier_removed_dat <- dat
   
   # Sanity check 
   if(!identical(start_colnames, colnames(dat))){
