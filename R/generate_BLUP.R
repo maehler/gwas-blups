@@ -174,7 +174,7 @@ generate_BLUP <- function(dat, random_effect, sample_column, start_column, fixed
   blup <- dplyr::select(blup, -all_of(not_converge_columns))
   
   # Shapiro test BLUP
-  purrr::map_df(dplyr::select(blup, -Genotype), ~ {
+  blup_stats <- purrr::map_df(dplyr::select(blup, -Genotype), ~ {
     tibble(Shapiro_BLUPs_pval = shapiro.test(.)$p.value,
            Shapiro_BLUPs_OK = Shapiro_BLUPs_pval > 0.05)
   }, .id = "Trait")
