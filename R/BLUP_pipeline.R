@@ -29,7 +29,7 @@ stats_out_dir <- file.path(out_dir, "stats")
 dir.create(stats_out_dir, recursive = TRUE, showWarnings = FALSE)
 
 # Read file 
-raw_data <- read.delim(input_data, header = TRUE, stringsAsFactors = FALSE)
+raw_data <- readr::read_tsv(input_data)
 
 # Print arguments 
 message("Arguments provided")
@@ -44,16 +44,14 @@ results <-
   generate_BLUP(dat = raw_data, sample_column = sample_column, random_effect = random_effect, start_column = start_column, fixed_effect = fixed_effect, col_convert = col_convert)
 
 if (is.list(results)) {
-  BLUP <- results$BLUP
-  
-  utils::write.table( x = results$BLUP, file = file.path(out_dir, paste0(data_name, "_BLUP.txt")), sep ="\t", row.names = FALSE, col.names = TRUE)
-  saveRDS( results$Outliers_residuals, file = file.path(stats_out_dir, paste0(data_name, "_Outliers_residuals.rds")))
-  writeLines( paste0(results$Not_converge_columns, collapse = ", "), con = file.path(stats_out_dir, paste0(data_name, "_Traits_not_converge.txt")))
-  utils::write.table( x = results$Outlier_data, file = file.path(stats_out_dir, paste0(data_name, "_Outlier_data.txt")), sep ="\t", row.names = FALSE)
-  utils::write.table( x = results$Outlier_removed_data, file = file.path(stats_out_dir, paste0(data_name, "_Outlier_removed_data.txt")), sep ="\t", row.names = FALSE)
-  utils::write.table( x = results$Shapiro_raw_normtest, file = file.path(stats_out_dir, paste0(data_name, "_raw_shapiro.txt")), sep ="\t", row.names = FALSE)
-  utils::write.table( x = results$BLUP_shapiro, file = file.path(stats_out_dir, paste0(data_name, "_BLUP_shapiro.txt")), sep ="\t", row.names = FALSE)
-  }
+  readr::write_tsv(results$BLUP, file = file.path(out_dir, paste0(data_name, "_BLUP.txt")))
+  saveRDS(results$Outliers_residuals, file = file.path(stats_out_dir, paste0(data_name, "_Outliers_residuals.rds")))
+  writeLines(paste0(results$Not_converge_columns, collapse = ", "), con = file.path(stats_out_dir, paste0(data_name, "_Traits_not_converge.txt")))
+  readr::write_tsv(results$Outlier_data, file = file.path(stats_out_dir, paste0(data_name, "_Outlier_data.txt")))
+  readr::write_tsv(results$Outlier_removed_data, file = file.path(stats_out_dir, paste0(data_name, "_Outlier_removed_data.txt")))
+  readr::write_tsv(results$Shapiro_raw_normtest, file = file.path(stats_out_dir, paste0(data_name, "_raw_shapiro.txt")))
+  readr::write_tsv(results$BLUP_shapiro, file = file.path(stats_out_dir, paste0(data_name, "_BLUP_shapiro.txt")))
+}
 
 #######################################################################
 # Generate plots
