@@ -9,7 +9,7 @@ source(here("R/generate_BLUP.R"))
 #######################################################################
 
 input_data <- "/mnt/picea/projects/aspseq/nstreet/swasp/Sara/GWAS_buds/Metabolite_data/raw/s12.Buds.LC.targeted.conc.normalised.Jan2018_Updated_Aug2020.txt"
-out_dir <- "/mnt/picea/projects/aspseq/nstreet/swasp/Sara/GWAS_buds/Metabolite_data/BLUPs/BLUPs_SPGs_pipeline_test"
+out_dir <- here("BLUPs_SPGs_pipeline_test_output")
 data_name <- "SPGs" # File name prefix
 line_name <- "Genotype" # Has to match line column name in input_data. E.g., "Genotype", "Clone". Required for boxplots. 
 
