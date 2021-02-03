@@ -47,7 +47,7 @@ generate_BLUP <- function(dat, random_effect, sample_column, start_column, fixed
   }
   
   if (col_convert) {
-    cat("\tConverting lmer model effect columns to factor type\n")
+    message("\tConverting lmer model effect columns to factor type")
     dat <- dplyr::mutate(dat, across(all_of(random_effect), as.factor))
     if (!is.null(fixed_effect)) {
       dat <- dplyr::mutate(dat, across(all_of(fixed_effect), as.factor))
@@ -68,7 +68,7 @@ generate_BLUP <- function(dat, random_effect, sample_column, start_column, fixed
   #######################################################################
   ## Outlier Removal
   #######################################################################
-  print("Remove outliers")
+  message("Remove outliers")
   
   # Create lmer formula
   termlabels <- c(paste0("(1|", colnames(dat)[random_effect], ")"))
@@ -76,7 +76,7 @@ generate_BLUP <- function(dat, random_effect, sample_column, start_column, fixed
     termlabels <- c(fixed_ef, termlabels)
   }
   
-  cat(paste("\tlmer model, effect included in formula:",termlabels,"\n"))
+  message(paste("\tlmer model, effect included in formula:", paste(termlabels, collapse = ", ")))
   
   # Find outliers
   trait_names <- colnames(dat)[start_column:ncol(dat)]
@@ -107,13 +107,13 @@ generate_BLUP <- function(dat, random_effect, sample_column, start_column, fixed
   
   # Sanity check 
   if(!identical(start_colnames, colnames(dat))){
-    stop(paste("Column names are changed. The column assumption no longer hold."))
+    stop("Column names are changed. The column assumption no longer hold.")
   }
   
   #######################################################################
   # orderNorm
   #######################################################################
-  print("Calculate orderNorm transformed")
+  message("Calculate orderNorm transformed")
   
   # Store shapiro test
   shap_norm <- purrr::map_df(trait_names, function(t) {
@@ -138,14 +138,14 @@ generate_BLUP <- function(dat, random_effect, sample_column, start_column, fixed
   
   # Sanity check 
   if(!identical(start_colnames, colnames(dat))){
-    stop(paste("Column names are changed. The column assumption no longer hold."))
+    stop("Column names are changed. The column assumption no longer hold.")
   }
   
   #######################################################################
   ## generate BLUP
   #######################################################################
-  print("Calculate BLUPs")
-  cat(paste("\tlmer model, effect included in formula:",termlabels,"\n"))
+  message("Calculate BLUPs")
+  message(paste("\tlmer model, effect included in formula:", paste(termlabels, collapse = ", ")))
   
   # Check all columns for NaN and Inf
   dat <- dplyr::mutate(dat, across(seq(start_column, ncol(dat)),
