@@ -32,12 +32,12 @@ dir.create(stats_out_dir, recursive = TRUE, showWarnings = FALSE)
 raw_data <- read.delim(input_data, header = TRUE, stringsAsFactors = FALSE)
 
 # Print arguments 
-print("Arguments provided")
-cat(paste("\t","Input data:",input_data,"\n"))
-cat(paste("\t","Output directory:",out_dir,"\n"))
-cat(paste("\t","Random effect:", colnames(raw_data)[random_effect],"\n"))
-cat(paste("\t","Fixed effect:", colnames(raw_data)[fixed_effect],"\n"))
-cat(paste("\t","Trait start column:", colnames(raw_data)[start_column],"\n"))
+message("Arguments provided")
+message(paste("\tInput data:", input_data))
+message(paste("\tOutput directory:", out_dir))
+message(paste("\tRandom effect:", colnames(raw_data)[random_effect]))
+message(paste("\tFixed effect:", colnames(raw_data)[fixed_effect]))
+message(paste("\tTrait start column:", colnames(raw_data)[start_column]))
 
 # Generate BLUP
 results <-
@@ -67,7 +67,7 @@ if (is.list(results)) {
       ggplot2::geom_histogram(bins = 20) +
       ggplot2::ggtitle(t)
   })
-  print("Creating BLUP histogram plots")
+  message("Creating BLUP histogram plots")
   ml <- gridExtra::marrangeGrob(plot_lst, nrow = 6, ncol = 6)
   ggplot2::ggsave(file.path(stats_out_dir, "BLUP_histogram.pdf"), ml, width = 20, height = 15)
 }
@@ -85,7 +85,7 @@ if (is.list(results)) {
       ggplot2::stat_qq_line() + 
       ggplot2::labs(title = t)
   })
-  print("Creating BLUP (non-transformed) qqplots")
+  message("Creating BLUP (non-transformed) qqplots")
   ml <- gridExtra::marrangeGrob(plot_lst, nrow = 6, ncol = 6)
   ggplot2::ggsave(file.path(stats_out_dir, "BLUP_qqplot_nontrans.pdf"), ml, width = 20, height = 15)
 }
@@ -103,7 +103,7 @@ if (is.list(results)) {
         ggplot2::stat_qq_line() +
         ggplot2::labs(title = t)
   })
-    print("Creating BLUP (transformed) qqplots")
+    message("Creating BLUP (transformed) qqplots")
     ml <- gridExtra::marrangeGrob(plot_lst, nrow = 6, ncol = 6)
     ggplot2::ggsave(file.path(stats_out_dir, "BLUP_qqplot_trans.pdf"), ml, width = 20, height = 15)
 }
@@ -133,7 +133,7 @@ if (is.list(results)) {
       ggplot2::labs(title = t) 
     return(p)
   })
-  print("Creating boxplots")
+  message("Creating boxplots")
   ml <- gridExtra::marrangeGrob(plot_lst, nrow = 1, ncol = 1)
   ggplot2::ggsave(file.path(stats_out_dir, "Boxplots_residual_outlier_rm.pdf"), ml, width = 25, height = 12)
 }
@@ -143,4 +143,4 @@ if (is.list(results)) {
 #######################################################################
 
 writeLines(capture.output(sessionInfo()), con = file.path(stats_out_dir, paste("sessionInfo",Sys.Date() ,".txt", sep="")))
-print("Done")
+message("Done")
