@@ -15,6 +15,8 @@
 #'
 generate_BLUP <- function(dat, random_effect, sample_column, start_column, fixed_effect = NULL, col_convert = TRUE) {
   
+  `%>%` <- dplyr::`%>%`
+  
   # Check if input arguments are given
   if (missing(dat)) {
     stop("Data needs to be provided")
